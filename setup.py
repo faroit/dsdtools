@@ -30,7 +30,8 @@ if __name__ == "__main__":
             'tqdm',
             'pyaml',
             'PySoundFile>=0.8',
-            'mir_eval'
+            'mir_eval',
+            'pandas'
         ],
 
         extras_require={

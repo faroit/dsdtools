@@ -82,7 +82,8 @@ class Target(object):
     sources : list[Source]
         list of ``Source`` objects for this ``Target``
     """
-    def __init__(self, sources):
+    def __init__(self, name, sources):
+        self.name = name
         self.sources = sources  # List of DSDSources
 
     @property

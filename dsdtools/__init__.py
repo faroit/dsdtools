@@ -179,7 +179,9 @@ class DB(object):
                                     target_sources.append(sources[source])
                             # add sources to target
                             if target_sources:
-                                targets[name] = Target(sources=target_sources)
+                                targets[name] = Target(
+                                    name=name, sources=target_sources
+                                )
                         # add targets to track
                         track.targets = targets
 
@@ -203,33 +205,6 @@ class DB(object):
             target_path = op.join(track_estimate_dir, target + '.wav')
             sf.write(target_path, estimate, track.rate)
         pass
-
-    def _evaluate_estimates(self, user_estimates, track):
-        audio_estimates = []
-        audio_reference = []
-        # make sure to always build the list in the same order
-        # therefore track.targets is an OrderedDict
-        labels_references = []  # save the list of targets to be evaluated
-        for target in list(track.targets.keys()):
-            try:
-                # try to fetch the audio from the user_results of a given key
-                estimate = user_estimates[target]
-                # append this target name to the list of labels
-                labels_references.append(target)
-                # add the audio to the list of estimates
-                audio_estimates.append(estimate)
-                # add the audio to the list of references
-                audio_reference.append(track.targets[target].audio)
-            except KeyError:
-                pass
-
-        if audio_estimates and audio_reference:
-            audio_estimates = np.array(audio_estimates)
-            audio_reference = np.array(audio_reference)
-            if audio_estimates.shape == audio_reference.shape:
-                self.evaluator.evaluate(
-                    audio_estimates, audio_reference, track.rate
-                )
 
     def test(self, user_function):
         """Test the dsdtools processing
@@ -330,7 +305,9 @@ class DB(object):
         if estimates_dir and not evaluate and user_function is not None:
             self._save_estimates(user_results, track, estimates_dir)
         if evaluate:
-            self._evaluate_estimates(user_results, track)
+            self.evaluator.evaluate_track(
+                track, user_results, estimates_dir
+            )
 
     def run(
         self,
