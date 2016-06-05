@@ -1,7 +1,7 @@
 from __future__ import print_function
 import numpy as np
 import mir_eval
-import utils
+from . import utils
 
 
 class BSSeval(object):
