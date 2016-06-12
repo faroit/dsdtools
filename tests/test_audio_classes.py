@@ -1,13 +1,13 @@
 from __future__ import print_function
 import pytest
-import dsdtools.audio_classes as ac
-import dsdtools
+import sisectools.audio_classes as ac
+import sisectools
 import numpy as np
 
 
 @pytest.fixture(params=['data/DSD100subset'])
 def dsd(request):
-    return dsdtools.DB(root_dir=request.param)
+    return sisectools.DB(root_dir=request.param)
 
 
 def test_targets(dsd):

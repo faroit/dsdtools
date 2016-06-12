@@ -1,6 +1,6 @@
 import os
 import pytest
-import dsdtools
+import sisectools
 import numpy as np
 
 
@@ -55,9 +55,9 @@ def user_function5(track):
 
 
 def test_file_loading():
-    # initiate dsdtools
+    # initiate sisectools
 
-    dsd = dsdtools.DB(root_dir="data/DSD100subset")
+    dsd = sisectools.DB(root_dir="data/DSD100subset")
     tracks = dsd.load_dsd_tracks()
 
     assert len(tracks) == 4
@@ -83,7 +83,7 @@ def test_file_loading():
 
 @pytest.fixture(params=['data/DSD100subset'])
 def dsd(request):
-    return dsdtools.DB(root_dir=request.param)
+    return sisectools.DB(root_dir=request.param)
 
 
 @pytest.mark.parametrize(
@@ -99,7 +99,7 @@ def test_env(path):
     if path is not None:
         os.environ["DSD_PATH"] = path
 
-    assert dsdtools.DB()
+    assert sisectools.DB()
 
 
 @pytest.mark.parametrize(

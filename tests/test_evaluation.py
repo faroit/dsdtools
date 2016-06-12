@@ -1,5 +1,5 @@
 import pytest
-import dsdtools
+import sisectools
 
 
 def user_function1(track):
@@ -22,7 +22,7 @@ def user_function1(track):
 )
 def test_evaluate(method):
 
-    dsd = dsdtools.DB(root_dir="data/DSD100subset", evaluation=method)
+    dsd = sisectools.DB(root_dir="data/DSD100subset", evaluation=method)
 
     # process dsd but do not save the results
     assert dsd.evaluate(

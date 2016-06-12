@@ -3,13 +3,13 @@ import setuptools
 if __name__ == "__main__":
     setuptools.setup(
         # Name of the project
-        name='dsdtools',
+        name='sisectools',
 
         # Version
-        version="0.1.0",
+        version="0.2.0",
 
         # Description
-        description='Python tools for the Demixing Secrets Dataset (DSD)',
+        description='Python tools SISEC',
 
         # Your contact information
         author='Fabian-Robert Stoeter',

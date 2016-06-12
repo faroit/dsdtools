@@ -1,16 +1,16 @@
 Modules
 -------
 
-.. automodule:: dsdtools
+.. automodule:: sisectools
     :members:
     :undoc-members:
     :show-inheritance:
     :inherited-members:
-.. autoclass: dsdtools.DB
+.. autoclass: sisectools.DB
     :members:
 
 .. toctree::
    :maxdepth: 3
 
    self
-   dsdtools.audio_classes
+   sisectools.audio_classes

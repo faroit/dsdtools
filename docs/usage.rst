@@ -2,7 +2,7 @@ Usage
 =====
 
 This package should nicely integrate with your existing code so that it
-can parse and process the *dsdtools* from python, thus makes it easy to
+can parse and process the *sisectools* from python, thus makes it easy to
 participate in the `SISEC MUS
 tasks <https://sisec.inria.fr/professionally-produced-music-recordings>`__.
 
@@ -11,10 +11,10 @@ Providing a compatible function
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The core of this package consists of calling a user-provided function
-which separates the mixtures from the dsdtools into estimated target
+which separates the mixtures from the sisectools into estimated target
 sources.
 
--  The function will take an dsdtools ``Track`` object which can be used
+-  The function will take an sisectools ``Track`` object which can be used
    from inside your algorithm.
 -  Participants can access
 -  ``Track.audio``, representing the stereo mixture as an ``np.ndarray``
@@ -53,29 +53,29 @@ Here is an example for such a function separating the mixture into a
 Create estimates for SiSEC evaluation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Setting up dsdtools
+Setting up sisectools
 '''''''''''''''''
 
-Simply import the dsdtools package in your main python function:
+Simply import the sisectools package in your main python function:
 
 .. code:: python
 
-   import dsdtools
+   import sisectools
 
-   dsd = dsdtools.DB(
-       root_dir='path/to/dsdtools/',
+   dsd = sisectools.DB(
+       root_dir='path/to/sisectools/',
    )
 
-The ``root_dir`` is the path to the dsdtools dataset folder. It can also
-be set system-wide. Just ``export DSD_PATH=/path/to/dsdtools/`` inside
+The ``root_dir`` is the path to the sisectools dataset folder. It can also
+be set system-wide. Just ``export DSD_PATH=/path/to/sisectools/`` inside
 your terminal. The ``user_estimates_dir`` is the path to the user
 estimates. If it is not set, the default will be used which is inside
-the *dsdtools* ``root_dir``.
+the *sisectools* ``root_dir``.
 
 Test if your separation function generates valid output
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-Before you run the full dsdtools, which might take very long, participants
+Before you run the full sisectools, which might take very long, participants
 can test their separation function by running:
 
 .. code:: python
@@ -83,9 +83,9 @@ can test their separation function by running:
    dsd.test(my_function)
 
 This test makes sure the user provided output is compatible to the
-dsdtools framework. The function returns ``True`` if the test succeeds.
+sisectools framework. The function returns ``True`` if the test succeeds.
 
-Processing the full dsdtools
+Processing the full sisectools
 ''''''''''''''''''''''''''
 
 To process all 100 DSD tracks and saves the results to the
@@ -106,7 +106,7 @@ training subset and then apply the algorithm on the test data:
     dsd.run(my_training_function, subsets="Dev")
     dsd.run(my_test_function, subsets="Test")
 
-Processing single or multiple dsdtools items
+Processing single or multiple sisectools items
 ''''''''''''''''''''''''''''''''''''''''''
 
 .. code:: python
@@ -146,7 +146,7 @@ GNU Parallel
     parallel can then split the input and pipe it into commands in
     parallel.
 
-By running only one ``id`` in each python process the dsdtools set can
+By running only one ``id`` in each python process the sisectools set can
 easily be processed with GNU parallel using multiple CPUs without any
 further modifications to your code:
 
@@ -162,9 +162,9 @@ The official SISEC evaluation relies on *MATLAB* because currently there
 does not exist a
 `bss\_eval <http://bass-db.gforge.inria.fr/bss_eval/>`__ implementation
 for python which produces indentical results. Therefore please run
-``dsdtools_only_eval.m`` from the `dsdtools Matlab
-scripts <https://github.com/faroit/dsdtoolsmat>`__ after you have
-processed and saved your estimates with *dsdtoolspy*.
+``sisectools_only_eval.m`` from the `sisectools Matlab
+scripts <https://github.com/faroit/sisectoolsmat>`__ after you have
+processed and saved your estimates with *sisectoolspy*.
 
 
 Evaluation in python
@@ -177,7 +177,7 @@ python with the help of
 `matlab\_wrapper <https://github.com/mrkrd/matlab_wrapper>`__. For
 convenience this package already has implemented the MATLAB evaluation
 functions but does not write them to mat files yet. We offer several
-optional methods to parse the dsdtools:
+optional methods to parse the sisectools:
 
 .. code:: python
 
@@ -188,7 +188,7 @@ optional methods to parse the dsdtools:
     dsd.run(my_function, save=False, evaluate=True)
 
     # Just evaluate the user_estimates folder when the estimates have already been saved to disk
-    # this equivalent to the MATLAB dsdtools_only_eval.m function
+    # this equivalent to the MATLAB sisectools_only_eval.m function
     dsd.run(save=False, evaluate=True)
     # or simply which is the same as as last line
     dsd.evaluate()

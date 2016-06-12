@@ -1,7 +1,7 @@
 Audio Classes
 ----------------
 
-.. automodule:: dsdtools.audio_classes
+.. automodule:: sisectools.audio_classes
     :members:
     :undoc-members:
     :show-inheritance:

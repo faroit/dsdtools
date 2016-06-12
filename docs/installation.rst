@@ -3,4 +3,4 @@ Installation
 
 .. code:: bash
 
-    pip install dsdtools
+    pip install sisectools

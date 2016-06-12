@@ -1,8 +1,8 @@
-# dsdtools
+# sisectools
 
-[![Build Status](https://travis-ci.org/faroit/dsdtools.svg?branch=master)](https://travis-ci.org/faroit/dsdtools)
-[![Coverage Status](https://coveralls.io/repos/github/faroit/dsdtools/badge.svg?branch=master)](https://coveralls.io/github/faroit/dsdtools?branch=master)
-[![Docs Status](https://readthedocs.org/projects/dsdtools/badge/?version=latest)](https://dsdtools.readthedocs.org/en/latest/)
+[![Build Status](https://travis-ci.org/faroit/sisectools.svg?branch=master)](https://travis-ci.org/faroit/sisectools)
+[![Coverage Status](https://coveralls.io/repos/github/faroit/sisectools/badge.svg?branch=master)](https://coveralls.io/github/faroit/sisectools?branch=master)
+[![Docs Status](https://readthedocs.org/projects/sisectools/badge/?version=latest)](https://sisectools.readthedocs.org/en/latest/)
 
 
 A python package to parse and process the __demixing secrets dataset (DSD)__ as part of the [Signal Separation Evaluation Campaign (SISEC)](https://sisec.inria.fr/)
@@ -10,7 +10,7 @@ A python package to parse and process the __demixing secrets dataset (DSD)__ as 
 ## Installation
 
 ```bash
-pip install dsdtools
+pip install sisectools
 ```
 
 ## Usage
@@ -55,29 +55,29 @@ def my_function(track):
 
 ### Create estimates for SiSEC evaluation
 
-#### Setting up dsdtools
+#### Setting up sisectools
 
-Simply import the dsdtools package in your main python function:
+Simply import the sisectools package in your main python function:
 
 ```python
-import dsdtools
+import sisectools
 
-dsd = dsdtools.DB(
-    root_dir='path/to/dsdtools',
+dsd = sisectools.DB(
+    root_dir='path/to/sisectools',
 )
 ```
 
-The ```root_dir``` is the path to the dsdtools dataset folder. It can also be set system-wide. Just ```export DSD_PATH=/path/to/dsdtools``` inside your terminal.
+The ```root_dir``` is the path to the sisectools dataset folder. It can also be set system-wide. Just ```export DSD_PATH=/path/to/sisectools``` inside your terminal.
 
 #### Test if your separation function generates valid output
 
-Before you run the full dsdtools, which might take very long, participants can test their separation function by running:
+Before you run the full sisectools, which might take very long, participants can test their separation function by running:
 ```python
 dsd.test(my_function)
 ```
-This test makes sure the user provided output is compatible to the dsdtools framework. The function returns `True` if the test succeeds.
+This test makes sure the user provided output is compatible to the sisectools framework. The function returns `True` if the test succeeds.
 
-#### Processing the full dsdtools
+#### Processing the full sisectools
 
 To process all 100 DSD tracks and saves the results to the folder ```estimates_dir```:
 
@@ -94,7 +94,7 @@ dsd.run(my_training_function, subsets="Dev")
 dsd.run(my_test_function, subsets="Test")
 ```
 
-#### Processing single or multiple dsdtools items
+#### Processing single or multiple sisectools items
 
 ```python
 dsd.run(my_function, ids=30)
@@ -120,7 +120,7 @@ Note: We use the python builtin multiprocessing package, which sometimes is unab
 
 > [GNU parallel](http://www.gnu.org/software/parallel) is a shell tool for executing jobs in parallel using one or more computers. A job can be a single command or a small script that has to be run for each of the lines in the input. The typical input is a list of files, a list of hosts, a list of users, a list of URLs, or a list of tables. A job can also be a command that reads from a pipe. GNU parallel can then split the input and pipe it into commands in parallel.
 
-By running only one ```id``` in each python process the dsdtools set can easily be processed with GNU parallel using multiple CPUs without any further modifications to your code:
+By running only one ```id``` in each python process the sisectools set can easily be processed with GNU parallel using multiple CPUs without any further modifications to your code:
 
 ```bash
 parallel --bar 'DSD_ID={0} python main.py' ::: {0..99}  
@@ -129,12 +129,12 @@ parallel --bar 'DSD_ID={0} python main.py' ::: {0..99}
 ## Compute the bss_eval measures
 
 The official SISEC evaluation relies on _MATLAB_ because currently there does not exist a [bss_eval](http://bass-db.gforge.inria.fr/bss_eval/) implementation for python which produces identical results.
-Therefore please run ```dsd100_only_eval.m``` from the [dsdtools Matlab scripts](https://github.com/faroit/dsd100mat) after you have processed and saved your estimates with _dsdtools_.
+Therefore please run ```dsd100_only_eval.m``` from the [sisectools Matlab scripts](https://github.com/faroit/dsd100mat) after you have processed and saved your estimates with _sisectools_.
 
 ## Full code Example
 
 ```python
-import dsdtools
+import sisectools
 
 def my_function(track):
     '''My fancy BSS algorithm'''
@@ -156,8 +156,8 @@ def my_function(track):
     return estimates
 
 
-# initiate dsdtools
-dsd = dsdtools.DB(root_dir="./Volumes/Data/dsdtools")
+# initiate sisectools
+dsd = sisectools.DB(root_dir="./Volumes/Data/sisectools")
 
 # verify if my_function works correctly
 if dsd.test(my_function):

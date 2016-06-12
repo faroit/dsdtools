@@ -1,8 +1,8 @@
-dsdtools
+sisectools
 ======
 
 A python package to parse and process the **demixing secrets dataset
-(dsdtools)** as part of the `Signal Separation Evaluation Campaign
+(sisectools)** as part of the `Signal Separation Evaluation Campaign
 (SISEC) <https://sisec.inria.fr/>`__
 
 
@@ -14,7 +14,7 @@ Contents:
    installation
    usage
    example
-   dsdtools
+   sisectools
 
 References
 ~~~~~~~~~~

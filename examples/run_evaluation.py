@@ -1,4 +1,4 @@
-import dsdtools
+import sisectools
 
 
 def my_function(track):
@@ -20,8 +20,8 @@ def my_function(track):
     }
     return estimates
 
-# initiate dsdtools
-dsd = dsdtools.DB()
+# initiate sisectools
+dsd = sisectools.DB(task='MUS')
 
 # verify if my_function works correctly
 if dsd.test(my_function):

@@ -13,24 +13,24 @@ import yaml
 import glob
 import tqdm
 import os
-import dsdtools
+import sisectools
 
 
 class DB(object):
     """
-    The dsdtools DB Object
+    The sisectools DB Object
 
     Parameters
     ----------
     root_dir : str, optional
-        dsdtools Root path. If set to `None` it will be read
+        sisectools Root path. If set to `None` it will be read
         from the `DSD_PATH` environment variable
 
     subsets : str or list, optional
-        select a _dsdtools_ subset `Dev` or `Test` (defaults to both)
+        select a _sisectools_ subset `Dev` or `Test` (defaults to both)
 
     setup_file : str, optional
-        _dsdtools_ Setup file in yaml format. Default is provided `dsd100.yaml`
+        _sisectools_ Setup file in yaml format. Default is provided `dsd100.yaml`
 
     evaluation : str, {None, 'bss_eval', 'mir_eval'}
         Setup evaluation module and starts matlab if bsseval is enabled
@@ -40,7 +40,7 @@ class DB(object):
     setup_file : str
         path to yaml file. default: `setup.yaml`
     root_dir : str
-        dsdtools Root path. Default is `DSD_PATH` env
+        sisectools Root path. Default is `DSD_PATH` env
     evaluation : bool
         Setup evaluation module
     mixtures_dir : str
@@ -58,15 +58,15 @@ class DB(object):
 
     Methods
     -------
-    load_dsd_tracks()
-        Iterates through the dsdtools folder structure and
+    load_tracks()
+        Iterates through the sisectools folder structure and
         returns ``Track`` objects
     test(user_function)
-        Test the dsdtools processing
+        Test the sisectools processing
     evaluate()
         Run the evaluation
     run(user_function=None, estimates_dir=None, evaluate=False)
-        Run the dsdtools processing, saving the estimates
+        Run the sisectools processing, saving the estimates
         and optionally evaluate them
 
     """
@@ -88,7 +88,7 @@ class DB(object):
             setup_path = op.join(self.root_dir, setup_file)
         else:
             setup_path = os.path.join(
-                dsdtools.__path__[0], 'configs', 'dsd100.yaml'
+                sisectools.__path__[0], 'configs', 'dsd100.yaml'
             )
 
         with open(setup_path, 'r') as f:
@@ -108,14 +108,14 @@ class DB(object):
             self.evaluator = evaluate.BSSeval(evaluation)
 
     def load_dsd_tracks(self, subsets=None, ids=None):
-        """Parses the dsdtools folder structure and returns `Track` objects
+        """Parses the sisectools folder structure and returns `Track` objects
 
         Parameters
         ==========
         subsets : list[str], optional
-            select a _dsdtools_ subset `Dev` or `Test`. Defaults to both
+            select a _sisectools_ subset `Dev` or `Test`. Defaults to both
         ids : list[int] or int, optional
-            select single or multiple _dsdtools_ items by ID
+            select single or multiple _sisectools_ items by ID
 
         Returns
         -------
@@ -240,7 +240,7 @@ class DB(object):
                 )
 
     def test(self, user_function):
-        """Test the dsdtools processing
+        """Test the sisectools processing
 
         Parameters
         ----------
@@ -259,7 +259,7 @@ class DB(object):
 
         See Also
         --------
-        run : Process the dsdtools
+        run : Process the sisectools
         """
         if not hasattr(user_function, '__call__'):
             raise TypeError("Please provide a function.")
@@ -295,7 +295,7 @@ class DB(object):
     def evaluate(
         self, user_function=None, estimates_dir=None, *args, **kwargs
     ):
-        """Run the dsdtools evaluation
+        """Run the sisectools evaluation
 
         shortcut to
         ``run(
@@ -350,7 +350,7 @@ class DB(object):
         parallel=False,
         cpus=4
     ):
-        """Run the dsdtools processing
+        """Run the sisectools processing
 
         Parameters
         ----------
@@ -365,9 +365,9 @@ class DB(object):
         evaluate : bool, optional
             evaluate the estimates by using. Default is False
         subsets : list[str], optional
-            select a _dsdtools_ subset `Dev` or `Test`. Defaults to both
+            select a _sisectools_ subset `Dev` or `Test`. Defaults to both
         ids : list[int] or int, optional
-            select single or multiple _dsdtools_ items by ID
+            select single or multiple _sisectools_ items by ID
         parallel: bool, optional
             activate multiprocessing
         cpus: int, optional
