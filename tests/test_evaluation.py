@@ -39,11 +39,11 @@ def test_evaluate(method):
     assert dsd.run(
         user_function=user_function1,
         ids=55,
-        evaluation=True
+        evaluate=True
     )
 
     assert dsd.run(
         user_function=user_function2,
-        evaluation=True,
-        ids=1
+        ids=1,
+        evaluate=True,
     )
