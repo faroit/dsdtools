@@ -90,33 +90,38 @@ class BSSeval(object):
             audio_estimates = np.array(audio_estimates)
             audio_reference = np.array(audio_reference)
 
-            SDR, ISR, SIR, SAR = self.evaluate(
-                audio_estimates, audio_reference
-            )
-            # iterate over all targets
-            for i, target in enumerate(targets):
-                # iterate over all frames
-                if verbose:
-                    print(target)
-                    print("SDR: ", str(SDR[i]))
-                    print("ISR: ", str(ISR[i]))
-                    print("SIR: ", str(SIR[i]))
-                    print("SAR: ", str(SAR[i]))
+            try:
+                SDR, ISR, SIR, SAR = self.evaluate(
+                    audio_estimates, audio_reference
+                )
+                # iterate over all targets
+                for i, target in enumerate(targets):
+                    # iterate over all frames
+                    if verbose:
+                        print(target)
+                        print("SDR: ", str(SDR[i]))
+                        print("ISR: ", str(ISR[i]))
+                        print("SIR: ", str(SIR[i]))
+                        print("SAR: ", str(SAR[i]))
 
-                for k in range(len(SDR[i])):
-                    rows.append(
-                        self.data.row2series(
-                            track_id=int(track.id),
-                            track_name=track.filename,
-                            target_name=target.name,
-                            estimate_dir=estimates_dir,
-                            SDR=SDR[i, k],
-                            ISR=ISR[i, k],
-                            SIR=SIR[i, k],
-                            SAR=SAR[i, k],
-                            sample=k * self.hop
+                    for k in range(len(SDR[i])):
+                        rows.append(
+                            self.data.row2series(
+                                track_id=int(track.id),
+                                track_name=track.filename,
+                                target_name=target.name,
+                                estimate_dir=estimates_dir,
+                                SDR=SDR[i, k],
+                                ISR=ISR[i, k],
+                                SIR=SIR[i, k],
+                                SAR=SAR[i, k],
+                                sample=k * self.hop
+                            )
                         )
-                    )
+
+            except ValueError:
+                pass
+
         return rows
 
     def evaluate(self, estimates, references):
