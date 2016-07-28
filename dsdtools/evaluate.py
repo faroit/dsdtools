@@ -5,17 +5,25 @@ from . import utils
 
 
 class BSSeval(object):
-    def __init__(self, collect=True):
-        self.df = utils.DF_writer([
+    def __init__(
+        self,
+        collect=True,
+        window=30*44100,
+        hop=15*44100,
+    ):
+        self.data = utils.DF_writer([
             'track_id',
             'track_name',
             'target_name',
-            'estimate_name',
+            'estimate_dir',
             'SDR',
             'ISR',
             'SIR',
             'SAR',
+            'sample'
         ])
+        self.window = window
+        self.hop = hop
 
     def evaluate_track(self, track, user_estimates, estimates_dir=None):
         audio_estimates = []
@@ -23,7 +31,7 @@ class BSSeval(object):
 
         # make sure to always build the list in the same order
         # therefore track.targets is an OrderedDict
-        labels_references = []  # save the list of targets to be evaluated
+        targets = []  # save the list of targets to be evaluated
         for key, target in list(track.targets.items()):
             try:
                 # try to fetch the audio from the user_results of a given key
@@ -33,7 +41,7 @@ class BSSeval(object):
                 # add the audio to the list of references
                 audio_reference.append(track.targets[key].audio)
                 # append this target name to the list of labels
-                labels_references.append(target)
+                targets.append(target)
             except KeyError:
                 # ignore wrong key and continue
                 continue
@@ -45,21 +53,21 @@ class BSSeval(object):
                 SDR, ISR, SIR, SAR = self.evaluate(
                     audio_estimates, audio_reference
                 )
-
-                for i, target in enumerate(labels_references):
-                    print(target.name)
-                    print(SDR[i])
-
-                    self.df.append(
-                        track_id=track.id,
-                        track_name=track.filename,
-                        target_name=target.name,
-                        estimate_dir=estimates_dir,
-                        SDR=SDR[i],
-                        ISR=ISR[i],
-                        SIR=SIR[i],
-                        SAR=SAR[i],
-                    )
+                # iterate over all targets
+                for i, target in enumerate(targets):
+                    # iterate over all frames
+                    for k in range(len(SDR[i])):
+                        self.data.append(
+                            track_id=int(track.id),
+                            track_name=track.filename,
+                            target_name=target.name,
+                            estimate_dir=estimates_dir,
+                            SDR=SDR[i, k],
+                            ISR=ISR[i, k],
+                            SIR=SIR[i, k],
+                            SAR=SAR[i, k],
+                            sample=k * self.hop
+                        )
 
     def evaluate(self, estimates, references, verbose=True):
         """BSS_EVAL images evaluation using mir_eval.separation module
@@ -84,7 +92,11 @@ class BSSeval(object):
         """
 
         sdr, isr, sir, sar, _ = mir_eval.separation.bss_eval_images_framewise(
-            estimates, references, compute_permutation=False
+            estimates,
+            references,
+            compute_permutation=False,
+            window=self.window,
+            hop=self.hop,
         )
 
         if verbose:
