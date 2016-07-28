@@ -8,5 +8,5 @@ PySoundFile>=0.8
 sphinx
 sphinx_rtd_theme
 numpydoc
-mir_eval
+git+https://github.com/faroit/mir_eval.git@bss_eval_images_framewise
 pandas
