@@ -142,7 +142,7 @@ class BSSeval(object):
         """
 
         sdr, isr, sir, sar, _ = mir_eval.separation.bss_eval_images_framewise(
-            estimates,
+            estimates + np.finfo(np.float).eps,
             references,
             compute_permutation=False,
             window=self.window,
