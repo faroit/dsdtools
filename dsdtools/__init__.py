@@ -142,12 +142,16 @@ class DB(object):
         else:
             # call the user provided function
             user_results = user_function(track)
+
         if estimates_dir and not evaluate and user_function is not None:
             self._save_estimates(user_results, track, estimates_dir)
-        if evaluate:
-            self.evaluator.evaluate_track(
+
+        if evaluate and user_results:
+            return self.evaluator.evaluate_track(
                 track, user_results, estimates_dir
             )
+        else:
+            return None
 
     def _save_estimates(self, user_estimates, track, estimates_dir):
         track_estimate_dir = op.join(
@@ -343,12 +347,15 @@ class DB(object):
             estimates_dirs = [estimates_dirs]
 
         for estimates_dir in estimates_dirs:
-            self.run(
+            results = self.run(
                 user_function=None,
                 estimates_dir=estimates_dir,
                 evaluate=True,
                 *args, **kwargs
             )
+            for result in results:
+                if result is not None:
+                    self.evaluator.data.append(result)
 
     def run(
         self,
@@ -402,12 +409,12 @@ class DB(object):
             pass
 
         # list of tracks to be processed
+        # TODO: adjust the number of tracks if not all estimates are provided
         tracks = self.load_dsd_tracks(subsets=subsets, ids=ids)
 
-        success = False
         if parallel:
             pool = multiprocessing.Pool(cpus, initializer=init_worker)
-            success = list(
+            results = list(
                 tqdm.tqdm(
                     pool.imap_unordered(
                         func=functools.partial(
@@ -428,7 +435,7 @@ class DB(object):
             pool.join()
 
         else:
-            success = list(
+            results = list(
                 tqdm.tqdm(
                     map(
                         lambda x: self._process_function(
@@ -442,7 +449,7 @@ class DB(object):
                     total=len(tracks)
                 )
             )
-        return success
+        return results
 
 
 def process_function_alias(obj, *args, **kwargs):

@@ -1,17 +1,32 @@
 from __future__ import print_function
 import numpy as np
 import mir_eval
-from . import utils
+import pandas as pd
+
+
+class DF_writer(object):
+    def __init__(self, columns):
+        self.df = pd.DataFrame(columns=columns)
+        self.columns = columns
+
+    def row2series(self, **row_data):
+        if set(self.columns) == set(row_data):
+            return pd.Series(row_data)
+
+    def append(self, series):
+            self.df = self.df.append(series, ignore_index=True)
+
+    def to_pickle(self, filename):
+        self.df.to_pickle(filename)
 
 
 class BSSeval(object):
     def __init__(
         self,
-        collect=True,
         window=30*44100,
         hop=15*44100,
     ):
-        self.data = utils.DF_writer([
+        self.data = DF_writer([
             'track_id',
             'track_name',
             'target_name',
@@ -22,12 +37,37 @@ class BSSeval(object):
             'SAR',
             'sample'
         ])
+
         self.window = window
         self.hop = hop
 
-    def evaluate_track(self, track, user_estimates, estimates_dir=None):
+    # def plot_results(self, measures=['SDR', 'ISR', 'SIR', 'SAR']):
+    #     figure, ax = plt.subplots(1, len(measures))
+    #     for i, measure in enumerate(measures):
+    #         sns.boxplot(
+    #             "target_name",
+    #             measure,
+    #             hue='estimate_dir',
+    #             data=self.data.df,
+    #             showmeans=True,
+    #             showfliers=False,
+    #             palette=sns.color_palette('muted'),
+    #             ax=ax[i],
+    #             meanline=True,
+    #         )
+    #     return figure
+
+    def evaluate_track(
+        self,
+        track,
+        user_estimates,
+        estimates_dir=None,
+        verbose=False
+    ):
         audio_estimates = []
         audio_reference = []
+
+        rows = []
 
         # make sure to always build the list in the same order
         # therefore track.targets is an OrderedDict
@@ -49,15 +89,23 @@ class BSSeval(object):
         if audio_estimates and audio_reference:
             audio_estimates = np.array(audio_estimates)
             audio_reference = np.array(audio_reference)
-            if audio_estimates.shape == audio_reference.shape:
-                SDR, ISR, SIR, SAR = self.evaluate(
-                    audio_estimates, audio_reference
-                )
-                # iterate over all targets
-                for i, target in enumerate(targets):
-                    # iterate over all frames
-                    for k in range(len(SDR[i])):
-                        self.data.append(
+
+            SDR, ISR, SIR, SAR = self.evaluate(
+                audio_estimates, audio_reference
+            )
+            # iterate over all targets
+            for i, target in enumerate(targets):
+                # iterate over all frames
+                if verbose:
+                    print(target)
+                    print("SDR: ", str(SDR[i]))
+                    print("ISR: ", str(ISR[i]))
+                    print("SIR: ", str(SIR[i]))
+                    print("SAR: ", str(SAR[i]))
+
+                for k in range(len(SDR[i])):
+                    rows.append(
+                        self.data.row2series(
                             track_id=int(track.id),
                             track_name=track.filename,
                             target_name=target.name,
@@ -68,8 +116,10 @@ class BSSeval(object):
                             SAR=SAR[i, k],
                             sample=k * self.hop
                         )
+                    )
+        return rows
 
-    def evaluate(self, estimates, references, verbose=True):
+    def evaluate(self, estimates, references):
         """BSS_EVAL images evaluation using mir_eval.separation module
 
         Parameters
@@ -98,11 +148,5 @@ class BSSeval(object):
             window=self.window,
             hop=self.hop,
         )
-
-        if verbose:
-            print("SDR: ", str(sdr))
-            print("ISR: ", str(isr))
-            print("SIR: ", str(sir))
-            print("SAR: ", str(sar))
 
         return sdr, isr, sir, sar

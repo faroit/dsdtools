@@ -10,3 +10,4 @@ sphinx_rtd_theme
 numpydoc
 git+https://github.com/faroit/mir_eval.git@bss_eval_images_framewise
 pandas
+seaborn
