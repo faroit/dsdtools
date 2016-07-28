@@ -2,33 +2,10 @@ from __future__ import print_function
 import dsdtools
 
 
-def my_function(track):
-    '''My fancy BSS algorithm'''
-
-    # get the audio mixture as numpy array shape=(nun_sampl, 2)
-    track.audio
-
-    # get the mixture path for external processing
-    track.path
-
-    # get the sample rate
-    track.rate
-
-    # return any number of targets
-    estimates = {
-        'vocals': track.audio,
-        'accompaniment': track.audio,
-    }
-    return estimates
-
 # initiate dsdtools
-dsd = dsdtools.DB()
+dsd = dsdtools.DB(evaluation=True)
 
-# verify if my_function works correctly
-if dsd.test(my_function):
-    print("my_function is valid")
+dsd.evaluate(estimates_dirs='./Estimates')
 
-dsd.run(
-    my_function,
-    estimates_dir='./Estimates',
-)
+print(dsd.evaluator.df.df)
+import ipdb; ipdb.set_trace()

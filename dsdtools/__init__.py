@@ -32,12 +32,12 @@ class DB(object):
     setup_file : str, optional
         _dsdtools_ Setup file in yaml format. Default is provided `dsd100.yaml`
 
-    evaluation : str, {None, 'bss_eval', 'mir_eval'}
-        Setup evaluation module and starts matlab if bsseval is enabled
-
     valid_ids : list[int] or int, optional
         select single or multiple _dsdtools_ items by ID that will be used
         for validation data (ie not included in the `Dev` set)
+
+    evaluation : bool
+        Init bss evaluation
 
     Attributes
     ----------
@@ -45,8 +45,6 @@ class DB(object):
         path to yaml file. default: `setup.yaml`
     root_dir : str
         dsdtools Root path. Default is `DSD_PATH` env
-    evaluation : bool
-        Setup evaluation module
     mixtures_dir : str
         path to Mixture directory
     sources_dir : str
@@ -56,7 +54,7 @@ class DB(object):
     targets_names : list[str]
         list of names of targets
     evaluator : BSSeval
-        evaluator used for evaluation of estimates
+        evaluation class used for evaluation of estimates
     setup : Dict
         loaded yaml configuration
 
@@ -78,8 +76,8 @@ class DB(object):
         self,
         root_dir=None,
         setup_file=None,
-        evaluation=None,
         valid_ids=None,
+        evaluation=False,
     ):
         if root_dir is None:
             if "DSD_PATH" in os.environ:
@@ -115,8 +113,54 @@ class DB(object):
         self.sources_names = list(self.setup['sources'].keys())
         self.targets_names = list(self.setup['targets'].keys())
 
-        if evaluation is not None:
-            self.evaluator = evaluate.BSSeval(evaluation)
+        if evaluation:
+            self.evaluator = evaluate.BSSeval()
+        else:
+            self.evaluator = None
+
+    def _process_function(self, track, user_function, estimates_dir, evaluate):
+        # load estimates from disk instead of processing
+        if user_function is None:
+            track_estimate_dir = op.join(
+                estimates_dir,
+                track.subset,
+                track.filename
+            )
+            user_results = {}
+            for target_path in glob.glob(track_estimate_dir + '/*.wav'):
+                target_name = op.splitext(
+                    os.path.basename(target_path)
+                )[0]
+                try:
+                    target_audio, rate = sf.read(
+                        target_path,
+                        always_2d=True
+                    )
+                    user_results[target_name] = target_audio
+                except RuntimeError:
+                    pass
+        else:
+            # call the user provided function
+            user_results = user_function(track)
+        if estimates_dir and not evaluate and user_function is not None:
+            self._save_estimates(user_results, track, estimates_dir)
+        if evaluate:
+            self.evaluator.evaluate_track(
+                track, user_results, estimates_dir
+            )
+
+    def _save_estimates(self, user_estimates, track, estimates_dir):
+        track_estimate_dir = op.join(
+            estimates_dir, track.subset, track.filename
+        )
+        if not os.path.exists(track_estimate_dir):
+            os.makedirs(track_estimate_dir)
+
+        # write out tracks to disk
+        for target, estimate in list(user_estimates.items()):
+            target_path = op.join(track_estimate_dir, target + '.wav')
+            sf.write(target_path, estimate, track.rate)
+        pass
 
     def load_dsd_tracks(self, subsets=None, ids=None):
         """Parses the dsdtools folder structure and returns `Track` objects
@@ -230,19 +274,6 @@ class DB(object):
             else:
                 return tracks
 
-    def _save_estimates(self, user_estimates, track, estimates_dir):
-        track_estimate_dir = op.join(
-            estimates_dir, track.subset, track.filename
-        )
-        if not os.path.exists(track_estimate_dir):
-            os.makedirs(track_estimate_dir)
-
-        # write out tracks to disk
-        for target, estimate in list(user_estimates.items()):
-            target_path = op.join(track_estimate_dir, target + '.wav')
-            sf.write(target_path, estimate, track.rate)
-        pass
-
     def test(self, user_function):
         """Test the dsdtools processing
 
@@ -297,53 +328,26 @@ class DB(object):
         return True
 
     def evaluate(
-        self, user_function=None, estimates_dir=None, *args, **kwargs
+        self, estimates_dirs=None, *args, **kwargs
     ):
-        """Run the dsdtools evaluation
+        """Run the dsdtools on a list of estimates_dirs
 
-        shortcut to
-        ``run(
-            user_function=None,
-            estimates_dir=estimates_dir,
-            evaluate=True
-        )``
+        Parameters
+        ----------
+        estimates_dirs : list[str], optional
+            A list of estimate directories, compliant with the dsd100 structure
+
+
         """
-        return self.run(
-            user_function=user_function,
-            estimates_dir=estimates_dir,
-            evaluate=True,
-            *args, **kwargs
-        )
+        if isinstance(estimates_dirs, str):
+            estimates_dirs = [estimates_dirs]
 
-    def _process_function(self, track, user_function, estimates_dir, evaluate):
-        # load estimates from disk instead of processing
-        if user_function is None:
-            track_estimate_dir = op.join(
-                estimates_dir,
-                track.subset,
-                track.filename
-            )
-            user_results = {}
-            for target_path in glob.glob(track_estimate_dir + '/*.wav'):
-                target_name = op.splitext(
-                    os.path.basename(target_path)
-                )[0]
-                try:
-                    target_audio, rate = sf.read(
-                        target_path,
-                        always_2d=True
-                    )
-                    user_results[target_name] = target_audio
-                except RuntimeError:
-                    pass
-        else:
-            # call the user provided function
-            user_results = user_function(track)
-        if estimates_dir and not evaluate and user_function is not None:
-            self._save_estimates(user_results, track, estimates_dir)
-        if evaluate:
-            self.evaluator.evaluate_track(
-                track, user_results, estimates_dir
+        for estimates_dir in estimates_dirs:
+            self.run(
+                user_function=None,
+                estimates_dir=estimates_dir,
+                evaluate=True,
+                *args, **kwargs
             )
 
     def run(

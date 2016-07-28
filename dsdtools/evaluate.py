@@ -5,12 +5,7 @@ from . import utils
 
 
 class BSSeval(object):
-    def __init__(self, method, collect=True):
-        methods = ("mir_eval")
-        if method not in methods:
-            raise ValueError("method must be in %s" % ','.join(methods))
-
-        self.method = method
+    def __init__(self, collect=True):
         self.df = utils.DF_writer([
             'track_id',
             'track_name',
@@ -56,8 +51,8 @@ class BSSeval(object):
                     print(SDR[i])
 
                     self.df.append(
-                        track_id=0,
-                        track_name=track.name,
+                        track_id=track.id,
+                        track_name=track.filename,
                         target_name=target.name,
                         estimate_dir=estimates_dir,
                         SDR=SDR[i],
@@ -66,12 +61,12 @@ class BSSeval(object):
                         SAR=SAR[i],
                     )
 
-    def evaluate(self, estimates, originals, verbose=True):
-        """Universal BSS evaluate frontend for several evaluators
+    def evaluate(self, estimates, references, verbose=True):
+        """BSS_EVAL images evaluation using mir_eval.separation module
 
         Parameters
         ----------
-        originals : np.ndarray, shape=(nsrc, nsampl, nchan)
+        references : np.ndarray, shape=(nsrc, nsampl, nchan)
             array containing true reference sources
         estimates : np.ndarray, shape=(nsrc, nsampl, nchan)
             array containing estimated sources
@@ -87,23 +82,15 @@ class BSSeval(object):
         SAR : np.ndarray, shape=(nsrc,)
             vector of Sources to Artifacts Ratios (SAR)
         """
-        print("Evaluating with %s" % self.method)
 
-        if self.method == "mir_eval":
-            mono_estimates = np.mean(estimates, axis=0).T
-            mono_originals = np.mean(originals, axis=0).T
-            SDR, SIR, SAR, perm = mir_eval.separation.bss_eval_sources(
-                mono_estimates,
-                mono_originals,
-            )
-
-            ISR = np.empty(SDR.shape)
-            ISR[:] = np.NAN
+        sdr, isr, sir, sar, _ = mir_eval.separation.bss_eval_images_framewise(
+            estimates, references, compute_permutation=False
+        )
 
         if verbose:
-            print("SDR: ", str(SDR))
-            print("ISR: ", str(ISR))
-            print("SIR: ", str(SIR))
-            print("SAR: ", str(SAR))
+            print("SDR: ", str(sdr))
+            print("ISR: ", str(isr))
+            print("SIR: ", str(sir))
+            print("SAR: ", str(sar))
 
-        return SDR, ISR, SIR, SAR
+        return sdr, isr, sir, sar
