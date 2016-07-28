@@ -33,15 +33,17 @@ def user_function2(track):
 )
 def test_evaluate(method):
 
-    dsd = dsdtools.DB(root_dir="data/DSD100subset", evaluation=method)
+    dsd = dsdtools.DB(root_dir="data/DSD100subset", evaluation=True)
 
     # process dsd but do not save the results
-    assert dsd.evaluate(
+    assert dsd.run(
         user_function=user_function1,
-        ids=55
+        ids=55,
+        evaluation=True
     )
 
-    assert dsd.evaluate(
+    assert dsd.run(
         user_function=user_function2,
+        evaluation=True,
         ids=1
     )
