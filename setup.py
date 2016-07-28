@@ -6,10 +6,11 @@ if __name__ == "__main__":
         name='dsdtools',
 
         # Version
-        version="0.1.0",
+        version="0.1.3",
 
         # Description
         description='Python tools for the Demixing Secrets Dataset (DSD)',
+        url='https://github.com/faroit/dsdtools',
 
         # Your contact information
         author='Fabian-Robert Stoeter',
@@ -33,6 +34,10 @@ if __name__ == "__main__":
             'mir_eval',
             'pandas'
         ],
+
+        package_data={
+            'dsdtools': ['configs/dsd100.yaml'],
+        },
 
         extras_require={
             'tests': [
@@ -63,7 +68,6 @@ if __name__ == "__main__":
             'Programming Language :: Python :: 3',
             'Topic :: Multimedia :: Sound/Audio :: Analysis',
             'Topic :: Multimedia :: Sound/Audio :: Sound Synthesis'
-            'Topic :: Scientific/Engineering :: Information Analysis',
         ],
 
         zip_safe=False,

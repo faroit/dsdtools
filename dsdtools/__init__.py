@@ -13,6 +13,7 @@ import yaml
 import glob
 import tqdm
 import os
+import dsdtools
 
 
 class DB(object):
@@ -29,10 +30,14 @@ class DB(object):
         select a _dsdtools_ subset `Dev` or `Test` (defaults to both)
 
     setup_file : str, optional
-        _dsdtools_ Setup file in yaml format. Default is `setup.yaml`
+        _dsdtools_ Setup file in yaml format. Default is provided `dsd100.yaml`
 
     evaluation : str, {None, 'bss_eval', 'mir_eval'}
         Setup evaluation module and starts matlab if bsseval is enabled
+
+    valid_ids : list[int] or int, optional
+        select single or multiple _dsdtools_ items by ID that will be used
+        for validation data (ie not included in the `Dev` set)
 
     Attributes
     ----------
@@ -72,8 +77,9 @@ class DB(object):
     def __init__(
         self,
         root_dir=None,
-        setup_file='setup.yaml',
-        evaluation=None
+        setup_file=None,
+        evaluation=None,
+        valid_ids=None,
     ):
         if root_dir is None:
             if "DSD_PATH" in os.environ:
@@ -83,7 +89,14 @@ class DB(object):
         else:
             self.root_dir = root_dir
 
-        with open(op.join(self.root_dir, setup_file), 'r') as f:
+        if setup_file is not None:
+            setup_path = op.join(self.root_dir, setup_file)
+        else:
+            setup_path = os.path.join(
+                dsdtools.__path__[0], 'configs', 'dsd100.yaml'
+            )
+
+        with open(setup_path, 'r') as f:
             self.setup = yaml.load(f)
 
         self.mixtures_dir = op.join(
@@ -92,6 +105,12 @@ class DB(object):
         self.sources_dir = op.join(
             self.root_dir, "Sources"
         )
+
+        if valid_ids is not None:
+            if not isinstance(valid_ids, collections.Sequence):
+                valid_ids = [valid_ids]
+
+        self.valid_ids = valid_ids
 
         self.sources_names = list(self.setup['sources'].keys())
         self.targets_names = list(self.setup['targets'].keys())
@@ -124,21 +143,31 @@ class DB(object):
                 subsets = [subsets]
             else:
                 subsets = subsets
+                if 'Valid' in subsets and 'Dev' in subsets:
+                    raise ValueError(
+                        "Cannot load Valid and Dev at the same time"
+                    )
         else:
             subsets = ['Dev', 'Test']
 
         tracks = []
         if op.isdir(self.mixtures_dir):
             for subset in subsets:
-                subset_folder = op.join(self.mixtures_dir, subset)
+
+                # For validation use Dev set and filter by ids later
+                if subset == 'Valid':
+                    subset_folder = op.join(self.mixtures_dir, 'Dev')
+                else:
+                    subset_folder = op.join(self.mixtures_dir, subset)
+
                 for _, track_folders, _ in os.walk(subset_folder):
-                    for track_name in track_folders:
+                    for track_filename in sorted(track_folders):
 
                         # create new dsd Track
                         track = Track(
-                            name=track_name,
+                            filename=track_filename,
                             path=op.join(
-                                op.join(subset_folder, track_name),
+                                op.join(subset_folder, track_filename),
                                 self.setup['mix']
                             ),
                             subset=subset
@@ -153,7 +182,7 @@ class DB(object):
                             abs_path = op.join(
                                 self.sources_dir,
                                 subset,
-                                track_name,
+                                track_filename,
                                 rel_path
                             )
                             if os.path.exists(abs_path):
@@ -172,7 +201,7 @@ class DB(object):
 
                             target_sources = []
                             for source, gain in list(target_srcs.items()):
-                                if source in track.sources.keys():
+                                if source in list(track.sources.keys()):
                                     # add gain to source tracks
                                     track.sources[source].gain = float(gain)
                                     # add tracks to components
@@ -188,14 +217,22 @@ class DB(object):
                         # add track to list of tracks
                         tracks.append(track)
 
+                # Filter tracks by valid_ids
+                if self.valid_ids is not None:
+                    if subset == 'Dev':
+                        tracks = [t for t in tracks
+                                  if t.id not in self.valid_ids]
+                    if subset == 'Valid':
+                        tracks = [t for t in tracks if t.id in self.valid_ids]
+
             if ids is not None:
-                return [tracks[i] for i in ids]
+                return [t for t in tracks if t.id in ids]
             else:
                 return tracks
 
     def _save_estimates(self, user_estimates, track, estimates_dir):
         track_estimate_dir = op.join(
-            estimates_dir, track.subset, track.name
+            estimates_dir, track.subset, track.filename
         )
         if not os.path.exists(track_estimate_dir):
             os.makedirs(track_estimate_dir)
@@ -231,7 +268,7 @@ class DB(object):
         if not hasattr(user_function, '__call__'):
             raise TypeError("Please provide a function.")
 
-        test_track = Track(name="test")
+        test_track = Track(filename="test")
         signal = np.random.random((66000, 2))
         test_track.audio = signal
         test_track.rate = 44100
@@ -284,7 +321,7 @@ class DB(object):
             track_estimate_dir = op.join(
                 estimates_dir,
                 track.subset,
-                track.name
+                track.filename
             )
             user_results = {}
             for target_path in glob.glob(track_estimate_dir + '/*.wav'):
@@ -356,7 +393,7 @@ class DB(object):
             raise RuntimeError("Provide a function or use evaluate feature!")
 
         try:
-            ids = int(os.environ['dsdtools_ID'])
+            ids = int(os.environ['DSD_ID'])
         except KeyError:
             pass
 

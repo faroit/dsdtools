@@ -1,3 +1,4 @@
+from __future__ import print_function
 import dsdtools
 
 
@@ -20,15 +21,12 @@ def my_function(track):
     }
     return estimates
 
-
 # initiate dsdtools
-dsd = dsdtools.DB(
-    root_dir="../data/DSD100subset",
-)
+dsd = dsdtools.DB()
 
 # verify if my_function works correctly
 if dsd.test(my_function):
-    print "my_function is valid"
+    print("my_function is valid")
 
 dsd.run(
     my_function,
