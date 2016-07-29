@@ -354,7 +354,7 @@ class DB(object):
                 *args, **kwargs
             )
             for result in results:
-                if result is not None:
+                if result:
                     self.evaluator.data.append(result)
 
     def run(
