@@ -2,6 +2,8 @@ from __future__ import print_function
 import numpy as np
 import mir_eval
 import pandas as pd
+import json
+from os import path as op
 
 
 class DF_writer(object):
@@ -121,6 +123,26 @@ class BSSeval(object):
 
             except ValueError:
                 pass
+
+            if estimates_dir and rows:
+                try:
+                    # save the dataframe corresponding to this estimate as json
+                    temp_frame = pd.DataFrame()
+                    for row in rows:
+                        temp_frame = temp_frame.append(row, ignore_index=True)
+                    json_string = json.dumps(json.loads(temp_frame.to_json()),
+                                             sort_keys=True,
+                                             indent=4,
+                                             separators=(',',':'))
+                    track_dir = op.join(
+                        estimates_dir,
+                        track.subset,
+                        track.filename
+                    )
+                    with open(track_dir + '/evaluation.json', 'w') as f:
+                        f.write(json_string)
+                except ValueError, IOError:
+                    pass
 
         return rows
 
