@@ -119,13 +119,18 @@ class DB(object):
             self.evaluator = None
 
     def _process_function(self, track, user_function, estimates_dir, evaluate):
-        # load estimates from disk instead of processing
-        if user_function is None:
+        # check for files in track_estimate_dir
+        disk_load = user_function is None
+        if estimates_dir or disk_load:
             track_estimate_dir = op.join(
                 estimates_dir,
                 track.subset,
                 track.filename
             )
+            if len(glob.glob(track_estimate_dir + '/*.wav')) > 0:
+                disk_load = True
+        # load estimates from disk instead of processing
+        if disk_load:
             user_results = {}
             for target_path in glob.glob(track_estimate_dir + '/*.wav'):
                 target_name = op.splitext(
