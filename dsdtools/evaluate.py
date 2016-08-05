@@ -37,7 +37,8 @@ class BSSeval(object):
             'ISR',
             'SIR',
             'SAR',
-            'sample'
+            'sample',
+            'subset'
         ])
 
         self.window = window
@@ -117,7 +118,8 @@ class BSSeval(object):
                                 ISR=ISR[i, k],
                                 SIR=SIR[i, k],
                                 SAR=SAR[i, k],
-                                sample=k * self.hop
+                                sample=k * self.hop,
+                                subset=track.subset
                             )
                         )
 
