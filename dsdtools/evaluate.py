@@ -16,7 +16,7 @@ class Data(object):
             return pd.Series(row_data)
 
     def append(self, series):
-            self.df = self.df.append(series, ignore_index=True)
+        self.df = self.df.append(series, ignore_index=True)
 
     def to_pickle(self, filename):
         self.df.to_pickle(filename)
