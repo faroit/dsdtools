@@ -6,7 +6,7 @@ import json
 from os import path as op
 
 
-class DF_writer(object):
+class Data(object):
     def __init__(self, columns):
         self.df = pd.DataFrame(columns=columns)
         self.columns = columns
@@ -28,7 +28,7 @@ class BSSeval(object):
         window=30*44100,
         hop=15*44100,
     ):
-        self.data = DF_writer([
+        self.data = Data([
             'track_id',
             'track_name',
             'target_name',
@@ -133,7 +133,7 @@ class BSSeval(object):
                     json_string = json.dumps(json.loads(temp_frame.to_json()),
                                              sort_keys=True,
                                              indent=4,
-                                             separators=(',',':'))
+                                             separators=(',', ':'))
                     track_dir = op.join(
                         estimates_dir,
                         track.subset,
@@ -141,7 +141,7 @@ class BSSeval(object):
                     )
                     with open(track_dir + '/evaluation.json', 'w') as f:
                         f.write(json_string)
-                except ValueError, IOError:
+                except (ValueError, IOError):
                     pass
 
         return rows
