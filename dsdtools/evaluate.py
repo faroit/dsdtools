@@ -4,6 +4,7 @@ import mir_eval
 import pandas as pd
 import json
 from os import path as op
+import scipy
 
 
 class Data(object):
@@ -21,12 +22,41 @@ class Data(object):
     def to_pickle(self, filename):
         self.df.to_pickle(filename)
 
+    def import_mat(self, filename):
+        mat = scipy.io.loadmat(filename)
+        mdata = mat['result']
+        ndata = {'Dev': mdata['dev'][0, 0], 'Test': mdata['test'][0, 0]}
+        for subset in ['Dev', 'Test']:
+            data = ndata[subset]['results']
+            for track in range(data.shape[1]):
+                tdata = data[0, track][0, 0]
+                for target in [
+                    'vocals', 'drums', 'other', 'bass', 'accompaniment'
+                ]:
+                    frames = len(tdata[target][0]['sdr'][0][0])
+                    for frame in range(frames):
+                        split_name = tdata['name'][0].split(' - ')
+                        s = self.row2series(
+                            track_id=int(split_name[0]),
+                            track_name=tdata['name'][0],
+                            target_name=target,
+                            estimate_dir=filename,
+                            SDR=tdata[target][0]['sdr'][0][0][frame],
+                            ISR=tdata[target][0]['isr'][0][0][frame],
+                            SIR=tdata[target][0]['sir'][0][0][frame],
+                            SAR=tdata[target][0]['sar'][0][0][frame],
+                            sample=frame,
+                            subset=subset
+                        )
+                        self.append(s)
+
 
 class BSSeval(object):
     def __init__(
         self,
         window=30*44100,
         hop=15*44100,
+        custom_data=None
     ):
         self.data = Data([
             'track_id',
