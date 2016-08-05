@@ -35,9 +35,11 @@ if __name__ == "__main__":
             'pandas',
             'seaborn'
         ],
-        
-        dependency_links=['https://github.com/craffel/mir_eval/tarball/master#egg=mir_eval'],
-        
+
+        dependency_links=[
+            'https://github.com/craffel/mir_eval/tarball/master#egg=mir_eval'
+        ],
+
         package_data={
             'dsdtools': ['configs/dsd100.yaml'],
         },
