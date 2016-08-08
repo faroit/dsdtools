@@ -50,6 +50,28 @@ class Data(object):
                         )
                         self.append(s)
 
+    def import_json(self, filename):
+        with open(filename, 'r') as f:
+            df = pd.read_json(f.read())
+        # play with it a bit to get the columns and rows in the right order
+        df = df.sort_index(ascending=True)
+        base_cols = [
+            'track_id',
+            'track_name',
+            'target_name',
+            'estimate_dir',
+            'SDR',
+            'ISR',
+            'SIR',
+            'SAR',
+            'sample',
+            'subset'
+        ]
+        new_cols = set(df.columns.tolist()).difference(set(base_cols))
+        cols = base_cols + list(new_cols)
+        df = df[cols]
+        self.df = pd.concat([self.df, df], ignore_index=True)
+
 
 class BSSeval(object):
     def __init__(
