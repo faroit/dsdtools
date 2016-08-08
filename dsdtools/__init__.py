@@ -337,7 +337,7 @@ class DB(object):
         return True
 
     def evaluate(
-        self, estimates_dirs=None, *args, **kwargs
+        self, estimates_dirs=None, save_json=True, *args, **kwargs
     ):
         """Run the dsdtools on a list of estimates_dirs
 
@@ -350,6 +350,8 @@ class DB(object):
         """
         if isinstance(estimates_dirs, str):
             estimates_dirs = [estimates_dirs]
+
+        self.evaluator.save_json = save_json
 
         for estimates_dir in estimates_dirs:
             results = self.run(

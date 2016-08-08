@@ -56,7 +56,8 @@ class BSSeval(object):
         self,
         window=30*44100,
         hop=15*44100,
-        custom_data=None
+        custom_data=None,
+        save_json=True
     ):
         self.data = Data([
             'track_id',
@@ -70,6 +71,8 @@ class BSSeval(object):
             'sample',
             'subset'
         ])
+
+        self.save_json = save_json
 
         self.window = window
         self.hop = hop
@@ -156,7 +159,7 @@ class BSSeval(object):
             except ValueError:
                 pass
 
-            if estimates_dir and rows:
+            if estimates_dir and rows and self.save_json:
                 try:
                     # save the dataframe corresponding to this estimate as json
                     temp_frame = pd.DataFrame()
