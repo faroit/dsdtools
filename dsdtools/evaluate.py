@@ -26,6 +26,7 @@ class Data(object):
         mat = scipy.io.loadmat(filename)
         mdata = mat['result']
         ndata = {'Dev': mdata['dev'][0, 0], 'Test': mdata['test'][0, 0]}
+        s = []
         for subset in ['Dev', 'Test']:
             data = ndata[subset]['results']
             for track in range(data.shape[1]):
@@ -36,7 +37,7 @@ class Data(object):
                     frames = len(tdata[target][0]['sdr'][0][0])
                     for frame in range(frames):
                         split_name = tdata['name'][0].split(' - ')
-                        s = self.row2series(
+                        s.append(self.row2series(
                             track_id=int(split_name[0]),
                             track_name=tdata['name'][0],
                             target_name=target,
@@ -47,8 +48,8 @@ class Data(object):
                             SAR=tdata[target][0]['sar'][0][0][frame],
                             sample=frame,
                             subset=subset
-                        )
-                        self.append(s)
+                        ))
+        self.append(s)
 
     def import_json(self, filename):
         with open(filename, 'r') as f:
