@@ -64,9 +64,7 @@ class Data(object):
             'SDR',
             'ISR',
             'SIR',
-            'SAR',
-            'sample',
-            'subset'
+            'SAR'
         ]
         new_cols = set(df.columns.tolist()).difference(set(base_cols))
         cols = base_cols + list(new_cols)
@@ -197,7 +195,7 @@ class BSSeval(object):
                         track.subset,
                         track.filename
                     )
-                    with open(track_dir + '/evaluation.json', 'w') as f:
+                    with open(track_dir + '/evaluation.json', 'w+') as f:
                         f.write(json_string)
                 except (ValueError, IOError):
                     pass
