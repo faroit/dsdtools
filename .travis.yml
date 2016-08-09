@@ -12,13 +12,13 @@ before_install:
     - if [[ $TRAVIS_PYTHON_VERSION == *"2."* ]]; then sudo apt-get install python-numpy; fi
     - if [[ $TRAVIS_PYTHON_VERSION == *"3."* ]]; then sudo apt-get install python3-numpy; fi
     - sudo apt-get install -qq libatlas-dev libatlas-base-dev liblapack-dev gfortran
-    - pip install -r requirements.txt
     - cd data
     - sh fetch.sh
     - cd ..
 
 install:
     - pip install -U pip wheel
+    - pip install -r requirements.txt
     - pip install -e .[tests,docs]
     - pip install python-coveralls
 
