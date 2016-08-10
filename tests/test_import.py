@@ -20,11 +20,16 @@ def test_mat_import(dsd):
     # compare the methods
     # make sure they have the same columns
     assert set(mat_data.df.columns) == set(dsd.evaluator.data.df.columns)
-    # estimate_dir will be different; remove it from both
+    # estimate_dir and sample will be different; remove them from both
     del mat_data.df['estimate_dir']
+    del mat_data.df['sample']
     del dsd.evaluator.data.df['estimate_dir']
+    del dsd.evaluator.data.df['sample']
     # reorder the columns so they are the same
     mat_data.df = mat_data.df[dsd.evaluator.data.df.columns]
+    # prune the rows that won't match
+    mat_data.df = mat_data.df[np.invert(np.isclose(mat_data.df['SDR'], 0.0))]
+    mat_data.df = mat_data.df[mat_data.df['subset'] == 'Test']
     # test the numerical fields
     mat_sub = mat_data.df.select_dtypes(include=['float64'])
     dsd_sub = dsd.evaluator.data.df.select_dtypes(include=['float64'])
@@ -32,6 +37,8 @@ def test_mat_import(dsd):
     # test the non-number fields
     mat_sub = mat_data.df.select_dtypes(exclude=['float64'])
     dsd_sub = dsd.evaluator.data.df.select_dtypes(exclude=['float64'])
+    mat_sub = mat_sub.reset_index()
+    del mat_sub['index']
     assert mat_sub.equals(dsd_sub)
 
 
