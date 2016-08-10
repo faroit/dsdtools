@@ -59,3 +59,7 @@ target/
 data/*
 !data/fetch.sh
 Estimates/
+tests/data/*
+!tests/data/evaluation.json
+!tests/data/prepare.sh
+!tests/data/results.mat
