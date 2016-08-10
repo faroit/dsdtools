@@ -15,9 +15,9 @@ before_install:
     - cd data
     - sh fetch.sh
     - cd ..
-    - cd tests
+    - cd tests/data
     - sh prepare.sh
-    - cd ..
+    - cd ../..
 
 install:
     - pip install -U pip wheel
