@@ -1,4 +1,3 @@
-import pytest
 import dsdtools
 
 
@@ -24,26 +23,14 @@ def user_function2(track):
     return estimates
 
 
-@pytest.mark.parametrize(
-    "method",
-    [
-        'mir_eval',
-        pytest.mark.xfail('not_a_function', raises=ValueError)
-    ]
-)
-def test_evaluate(method):
+def test_evaluate():
 
     dsd = dsdtools.DB(root_dir="data/DSD100subset", evaluation=True)
 
     # process dsd but do not save the results
-    assert dsd.run(
+    result = dsd.run(
         user_function=user_function1,
         ids=55,
         evaluate=True
     )
-
-    assert dsd.run(
-        user_function=user_function2,
-        ids=1,
-        evaluate=True,
-    )
+    assert result[0][0].any()
