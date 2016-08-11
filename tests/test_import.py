@@ -37,7 +37,10 @@ def test_mat_import(dsd):
     # it will likely fail due to different ordering of rows
     if not num_comp:
         # try the misorder row test
-        test_index = [18, 19, 10, 11]
+        test_index = [mat_sub.index[2],
+                      mat_sub.index[3],
+                      mat_sub.index[0],
+                      mat_sub.index[1]]
         mat_data.df = mat_data.df.reindex(test_index)
         mat_sub = mat_data.df.select_dtypes(include=['float64'])
         num_comp = (np.all(np.isclose(mat_sub.as_matrix(),
@@ -48,7 +51,8 @@ def test_mat_import(dsd):
     dsd_sub = dsd.evaluator.data.df.select_dtypes(exclude=['float64'])
     mat_sub = mat_sub.reset_index()
     del mat_sub['index']
-    assert mat_sub.equals(dsd_sub)
+    df_comp = mat_sub.equals(dsd_sub)
+    assert df_comp
 
 
 def test_json_import(dsd):
@@ -74,7 +78,10 @@ def test_json_import(dsd):
     # it may fail due to different ordering of rows
     if not num_comp:
         # try the misorder row test
-        test_index = [2, 3, 0, 1]
+        test_index = [json_sub.index[2],
+                      json_sub.index[3],
+                      json_sub.index[0],
+                      json_sub.index[1]]
         json_data.df = json_data.df.reindex(test_index)
         json_sub = json_data.df.select_dtypes(include=['float64'])
         num_comp = (np.all(np.isclose(json_sub.as_matrix(),
@@ -83,4 +90,8 @@ def test_json_import(dsd):
     # test the non-number fields
     json_sub = json_data.df.select_dtypes(exclude=['float64'])
     dsd_sub = dsd.evaluator.data.df.select_dtypes(exclude=['float64'])
+    df_comp = json_sub.equals(dsd_sub)
+    if not df_comp:
+        json_sub = json_sub.reset_index()
+        del json_sub['index']
     assert json_sub.equals(dsd_sub)

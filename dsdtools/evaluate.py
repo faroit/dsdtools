@@ -36,19 +36,21 @@ class Data(object):
                 ]:
                     frames = len(tdata[target][0]['sdr'][0][0])
                     for frame in range(frames):
-                        split_name = tdata['name'][0].split(' - ')
-                        s.append(self.row2series(
-                            track_id=int(split_name[0]),
-                            track_name=tdata['name'][0],
-                            target_name=target,
-                            estimate_dir=filename,
-                            SDR=tdata[target][0]['sdr'][0][0][frame],
-                            ISR=tdata[target][0]['isr'][0][0][frame],
-                            SIR=tdata[target][0]['sir'][0][0][frame],
-                            SAR=tdata[target][0]['sar'][0][0][frame],
-                            sample=frame,
-                            subset=subset
-                        ))
+                        sar = tdata[target][0]['sar'][0][0][frame]
+                        if str(sar) != 'nan':
+                            split_name = tdata['name'][0].split(' - ')
+                            s.append(self.row2series(
+                                track_id=int(split_name[0]),
+                                track_name=tdata['name'][0],
+                                target_name=target,
+                                estimate_dir=filename,
+                                SDR=tdata[target][0]['sdr'][0][0][frame],
+                                ISR=tdata[target][0]['isr'][0][0][frame],
+                                SIR=tdata[target][0]['sir'][0][0][frame],
+                                SAR=sar,
+                                sample=frame,
+                                subset=subset
+                            ))
         self.append(s)
 
     def import_json(self, filename):
