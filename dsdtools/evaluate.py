@@ -25,10 +25,10 @@ class Data(object):
     def import_mat(self, filename):
         mat = scipy.io.loadmat(filename)
         mdata = mat['result']
-        ndata = {'Dev': mdata['dev'][0, 0], 'Test': mdata['test'][0, 0]}
+        ndata = {n.title(): mdata[n][0, 0] for n in mdata.dtype.names}
         s = []
-        for subset in ['Dev', 'Test']:
-            data = ndata[subset]['results']
+        for subset, subset_data in ndata.items():
+            data = subset_data['results']
             for track in range(data.shape[1]):
                 tdata = data[0, track][0, 0]
                 for target in [
