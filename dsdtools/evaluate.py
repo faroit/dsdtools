@@ -25,19 +25,27 @@ class Data(object):
     def import_mat(self, filename):
         mat = scipy.io.loadmat(filename)
         mdata = mat['result']
-        ndata = {'Dev': mdata['dev'][0, 0], 'Test': mdata['test'][0, 0]}
+        ndata = {n.title(): mdata[n][0, 0] for n in mdata.dtype.names}
         s = []
-        for subset in ['Dev', 'Test']:
-            data = ndata[subset]['results']
+        for subset, subset_data in ndata.items():
+            data = subset_data['results']
             for track in range(data.shape[1]):
                 tdata = data[0, track][0, 0]
                 for target in [
                     'vocals', 'drums', 'other', 'bass', 'accompaniment'
                 ]:
                     frames = len(tdata[target][0]['sdr'][0][0])
-                    for frame in range(frames):
-                        sar = tdata[target][0]['sar'][0][0][frame]
-                        if str(sar) != 'nan':
+
+                    has_nan_values = []
+                    for metric in ['sdr', 'isr', 'sir', 'sar']:
+                        score = tdata[target][0][metric][0][0]
+                        has_nan_values.append(np.all(np.isnan(score)))
+
+                    if any(has_nan_values):
+                        # skip target
+                        continue
+                    else:
+                        for frame in range(frames):
                             split_name = tdata['name'][0].split(' - ')
                             s.append(self.row2series(
                                 track_id=int(split_name[0]),
@@ -47,7 +55,7 @@ class Data(object):
                                 SDR=tdata[target][0]['sdr'][0][0][frame],
                                 ISR=tdata[target][0]['isr'][0][0][frame],
                                 SIR=tdata[target][0]['sir'][0][0][frame],
-                                SAR=sar,
+                                SAR=tdata[target][0]['sar'][0][0][frame],
                                 sample=frame,
                                 subset=subset
                             ))
