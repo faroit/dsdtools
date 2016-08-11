@@ -33,7 +33,8 @@ def test_mat_import(dsd):
     # test the numerical fields
     mat_sub = mat_data.df.select_dtypes(include=['float64'])
     dsd_sub = dsd.evaluator.data.df.select_dtypes(include=['float64'])
-    assert np.all(np.isclose(mat_sub.as_matrix(), dsd_sub.as_matrix()))
+    num_comp = (np.all(np.isclose(mat_sub.as_matrix(), dsd_sub.as_matrix())))
+    assert num_comp
     # test the non-number fields
     mat_sub = mat_data.df.select_dtypes(exclude=['float64'])
     dsd_sub = dsd.evaluator.data.df.select_dtypes(exclude=['float64'])
@@ -61,7 +62,8 @@ def test_json_import(dsd):
     # test the numerical fields
     json_sub = json_data.df.select_dtypes(include=['float64'])
     dsd_sub = dsd.evaluator.data.df.select_dtypes(include=['float64'])
-    assert np.all(np.isclose(json_sub.as_matrix(), dsd_sub.as_matrix()))
+    num_comp = (np.all(np.isclose(json_sub.as_matrix(), dsd_sub.as_matrix())))
+    assert num_comp
     # test the non-number fields
     json_sub = json_data.df.select_dtypes(exclude=['float64'])
     dsd_sub = dsd.evaluator.data.df.select_dtypes(exclude=['float64'])
