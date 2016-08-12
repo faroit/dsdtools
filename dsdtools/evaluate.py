@@ -8,13 +8,30 @@ import scipy
 
 
 class Data(object):
-    def __init__(self, columns):
-        self.df = pd.DataFrame(columns=columns)
-        self.columns = columns
+    def __init__(self, custom_column_keys=None):
+        self.columns = [
+            'track_id',
+            'track_name',
+            'target_name',
+            'estimate_dir',
+            'estimate_name',
+            'SDR',
+            'ISR',
+            'SIR',
+            'SAR',
+            'sample',
+            'subset'
+        ]
+
+        self.custom_column_keys = custom_column_keys
+
+        if custom_column_keys is not None:
+            self.columns.extend(self.custom_column_keys)
+
+        self.df = pd.DataFrame(columns=self.columns)
 
     def row2series(self, **row_data):
-        if set(self.columns) == set(row_data):
-            return pd.Series(row_data)
+        return pd.Series(row_data)
 
     def append(self, series):
         self.df = self.df.append(series, ignore_index=True)
@@ -22,11 +39,23 @@ class Data(object):
     def to_pickle(self, filename):
         self.df.to_pickle(filename)
 
-    def import_mat(self, filename):
+    def import_mat(self, filename, estimate_name='', custom_column_dict=None):
         mat = scipy.io.loadmat(filename)
         mdata = mat['result']
         ndata = {n.title(): mdata[n][0, 0] for n in mdata.dtype.names}
         s = []
+
+        # some checks
+        if self.custom_column_keys is not None:
+            if custom_column_dict is None:
+                raise(ValueError("Custom value data need to be submitted"))
+
+            if set(custom_column_dict.keys()) != set(self.custom_column_keys):
+                raise(
+                    ValueError("Custom data for each custom data key \
+                                needs to be provided")
+                )
+
         for subset, subset_data in ndata.items():
             data = subset_data['results']
             for track in range(data.shape[1]):
@@ -47,18 +76,24 @@ class Data(object):
                     else:
                         for frame in range(frames):
                             split_name = tdata['name'][0].split(' - ')
-                            s.append(self.row2series(
+                            series = self.row2series(
                                 track_id=int(split_name[0]),
                                 track_name=tdata['name'][0],
                                 target_name=target,
                                 estimate_dir=filename,
+                                estimate_name=estimate_name,
                                 SDR=tdata[target][0]['sdr'][0][0][frame],
                                 ISR=tdata[target][0]['isr'][0][0][frame],
                                 SIR=tdata[target][0]['sir'][0][0][frame],
                                 SAR=tdata[target][0]['sar'][0][0][frame],
                                 sample=frame,
                                 subset=subset
-                            ))
+                            )
+                            if custom_column_dict is not None:
+                                custom_data_s = pd.Series(custom_column_dict)
+                                series.append(custom_data_s)
+
+                            s.append(series)
         self.append(s)
 
     def import_json(self, filename):
@@ -71,6 +106,7 @@ class Data(object):
             'track_name',
             'target_name',
             'estimate_dir',
+            'estimate_name',
             'SDR',
             'ISR',
             'SIR',
@@ -87,42 +123,12 @@ class BSSeval(object):
         self,
         window=30*44100,
         hop=15*44100,
-        custom_data=None,
         save_json=True
     ):
-        self.data = Data([
-            'track_id',
-            'track_name',
-            'target_name',
-            'estimate_dir',
-            'SDR',
-            'ISR',
-            'SIR',
-            'SAR',
-            'sample',
-            'subset'
-        ])
-
+        self.data = Data()
         self.save_json = save_json
-
         self.window = window
         self.hop = hop
-
-    # def plot_results(self, measures=['SDR', 'ISR', 'SIR', 'SAR']):
-    #     figure, ax = plt.subplots(1, len(measures))
-    #     for i, measure in enumerate(measures):
-    #         sns.boxplot(
-    #             "target_name",
-    #             measure,
-    #             hue='estimate_dir',
-    #             data=self.data.df,
-    #             showmeans=True,
-    #             showfliers=False,
-    #             palette=sns.color_palette('muted'),
-    #             ax=ax[i],
-    #             meanline=True,
-    #         )
-    #     return figure
 
     def evaluate_track(
         self,
@@ -153,6 +159,11 @@ class BSSeval(object):
                 # ignore wrong key and continue
                 continue
 
+        if 'estimates_name' in user_estimates:
+            estimates_name = user_estimates['estimates_name']
+        else:
+            estimates_name = op.basename(estimates_dir)
+
         if audio_estimates and audio_reference:
             audio_estimates = np.array(audio_estimates)
             audio_reference = np.array(audio_reference)
@@ -178,6 +189,7 @@ class BSSeval(object):
                                 track_name=track.filename,
                                 target_name=target.name,
                                 estimate_dir=estimates_dir,
+                                estimate_name=estimates_name,
                                 SDR=SDR[i, k],
                                 ISR=ISR[i, k],
                                 SIR=SIR[i, k],
