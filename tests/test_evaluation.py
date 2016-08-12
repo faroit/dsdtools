@@ -23,6 +23,17 @@ def user_function2(track):
     return estimates
 
 
+def user_function3(track):
+    '''Pass'''
+
+    # return incorrect shaped targets
+    estimates = {
+        'vocals': track.audio[2:],
+        'accompaniment': track.audio[2:],
+    }
+    return estimates
+
+
 def test_evaluate():
 
     dsd = dsdtools.DB(root_dir="data/DSD100subset", evaluation=True)
@@ -34,3 +45,15 @@ def test_evaluate():
         evaluate=True
     )
     assert result[0][0].any()
+
+
+def test_eval_failure():
+
+    dsd = dsdtools.DB(root_dir="data/DSD100subset", evaluation=True)
+
+    track = dsd.load_dsd_tracks(ids=55)[0]
+
+    # test with a failing evaluation
+    results = dsd.evaluator.evaluate_track(track,
+                                           user_function3(track))
+    assert len(results) == 0
