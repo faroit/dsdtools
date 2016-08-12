@@ -47,6 +47,19 @@ def test_evaluate():
     assert result[0][0].any()
 
 
+def test_verbosity():
+
+    dsd = dsdtools.DB(root_dir="data/DSD100subset", evaluation=True)
+
+    track = dsd.load_dsd_tracks(ids=55)[0]
+
+    # test with verbose set to True (for coveralls)
+    results = dsd.evaluator.evaluate_track(track,
+                                           user_function1(track),
+                                           verbose=True)
+    assert results
+
+
 def test_eval_failure():
 
     dsd = dsdtools.DB(root_dir="data/DSD100subset", evaluation=True)
