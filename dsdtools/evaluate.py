@@ -8,7 +8,7 @@ import scipy
 
 
 class Data(object):
-    def __init__(self, custom_column_keys=None):
+    def __init__(self):
         self.columns = [
             'track_id',
             'track_name',
@@ -23,11 +23,6 @@ class Data(object):
             'subset'
         ]
 
-        self.custom_column_keys = custom_column_keys
-
-        if custom_column_keys is not None:
-            self.columns.extend(self.custom_column_keys)
-
         self.df = pd.DataFrame(columns=self.columns)
 
     def row2series(self, **row_data):
@@ -39,22 +34,11 @@ class Data(object):
     def to_pickle(self, filename):
         self.df.to_pickle(filename)
 
-    def import_mat(self, filename, estimate_name='', custom_column_dict=None):
+    def import_mat(self, filename, estimate_name=''):
         mat = scipy.io.loadmat(filename)
         mdata = mat['result']
         ndata = {n.title(): mdata[n][0, 0] for n in mdata.dtype.names}
         s = []
-
-        # some checks
-        if self.custom_column_keys is not None:
-            if custom_column_dict is None:
-                raise(ValueError("Custom value data need to be submitted"))
-
-            if set(custom_column_dict.keys()) != set(self.custom_column_keys):
-                raise(
-                    ValueError("Custom data for each custom data key \
-                                needs to be provided")
-                )
 
         for subset, subset_data in ndata.items():
             data = subset_data['results']
@@ -89,10 +73,6 @@ class Data(object):
                                 sample=frame,
                                 subset=subset
                             )
-                            if custom_column_dict is not None:
-                                custom_data_s = pd.Series(custom_column_dict)
-                                series.append(custom_data_s)
-
                             s.append(series)
         self.append(s)
 
