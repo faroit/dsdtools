@@ -135,6 +135,7 @@ class BSSeval(object):
         track,
         user_estimates,
         estimates_dir=None,
+        estimates_name=None,
         verbose=False
     ):
         audio_estimates = []
@@ -162,7 +163,8 @@ class BSSeval(object):
         if 'estimates_name' in user_estimates:
             estimates_name = user_estimates['estimates_name']
         else:
-            estimates_name = op.basename(estimates_dir)
+            if estimates_dir is not None:
+                estimates_name = op.basename(estimates_dir)
 
         if audio_estimates and audio_reference:
             audio_estimates = np.array(audio_estimates)
