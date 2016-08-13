@@ -44,7 +44,7 @@ def test_mat_import(dsd):
         estimates_dirs='tests/data/'
     )
     # load the mat file
-    mat_data = ev.Data(dsd.evaluator.data.columns)
+    mat_data = ev.Data()
     mat_data.import_mat('tests/data/results.mat')
     # compare the methods
     # make sure they have the same columns
@@ -69,7 +69,7 @@ def test_json_import(dsd):
         estimates_dirs='tests/data/'
     )
     # load the json file
-    json_data = ev.Data(dsd.evaluator.data.columns)
+    json_data = ev.Data()
     json_data.import_json('tests/data/evaluation.json')
     # compare the methods
     # make sure they have the same columns
