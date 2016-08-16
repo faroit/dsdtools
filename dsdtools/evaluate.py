@@ -5,6 +5,18 @@ import pandas as pd
 import json
 from os import path as op
 import scipy
+import csv
+
+
+def load_track_list(csv_file='configs/tracklist.csv'):
+    tracklist = [None]*101
+    with open(csv_file, 'rt') as csvfile:
+        spamreader = csv.reader(csvfile, delimiter=';')
+        # skip header
+        next(spamreader)
+        for i, row in enumerate(spamreader):
+            tracklist[int(row[0])] = row[1]
+    return tracklist
 
 
 class Data(object):
@@ -24,6 +36,7 @@ class Data(object):
         ]
 
         self.df = pd.DataFrame(columns=self.columns)
+        self.tracklist = load_track_list()
 
     def row2series(self, **row_data):
         return pd.Series(row_data)
@@ -63,10 +76,9 @@ class Data(object):
                             try:
                                 track_id = int(split_name[0])
                             except ValueError:
-                                if subset == 'Dev':
-                                    track_id = 55
-                                else:
-                                    track_id = 0
+                                track_id = int(
+                                    self.tracklist.index(tdata['name'][0])
+                                )
 
                             series = self.row2series(
                                 track_id=track_id,

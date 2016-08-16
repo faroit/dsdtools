@@ -41,7 +41,7 @@ if __name__ == "__main__":
         ],
 
         package_data={
-            'dsdtools': ['configs/dsd100.yaml'],
+            'dsdtools': ['configs/dsd100.yaml', 'configs/tracklist.csv'],
         },
 
         extras_require={
