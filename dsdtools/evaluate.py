@@ -6,10 +6,14 @@ import json
 from os import path as op
 import scipy
 import csv
+import dsdtools
 
 
-def load_track_list(csv_file='configs/tracklist.csv'):
+def load_track_list():
     tracklist = [None]*101
+    csv_file = op.join(
+        dsdtools.__path__[0], 'configs', 'tracklist.csv'
+    )
     with open(csv_file, 'rt') as csvfile:
         spamreader = csv.reader(csvfile, delimiter=';')
         # skip header
