@@ -40,17 +40,6 @@ class Data(object):
         ndata = {n.title(): mdata[n][0, 0] for n in mdata.dtype.names}
         s = []
 
-        # some checks
-        if self.custom_column_keys is not None:
-            if custom_column_dict is None:
-                raise(ValueError("Custom value data need to be submitted"))
-
-            if set(custom_column_dict.keys()) != set(self.custom_column_keys):
-                raise(
-                    ValueError("Custom data for each custom data key \
-                                needs to be provided")
-                )
-
         for subset, subset_data in ndata.items():
             data = subset_data['results']
             for track in range(data.shape[1]):
