@@ -40,6 +40,17 @@ class Data(object):
         ndata = {n.title(): mdata[n][0, 0] for n in mdata.dtype.names}
         s = []
 
+        # some checks
+        if self.custom_column_keys is not None:
+            if custom_column_dict is None:
+                raise(ValueError("Custom value data need to be submitted"))
+
+            if set(custom_column_dict.keys()) != set(self.custom_column_keys):
+                raise(
+                    ValueError("Custom data for each custom data key \
+                                needs to be provided")
+                )
+
         for subset, subset_data in ndata.items():
             data = subset_data['results']
             for track in range(data.shape[1]):
@@ -60,8 +71,16 @@ class Data(object):
                     else:
                         for frame in range(frames):
                             split_name = tdata['name'][0].split(' - ')
+                            try:
+                                track_id = int(split_name[0])
+                            except ValueError:
+                                if subset == 'Dev':
+                                    track_id = 55
+                                else:
+                                    track_id = 0
+
                             series = self.row2series(
-                                track_id=int(split_name[0]),
+                                track_id=track_id,
                                 track_name=tdata['name'][0],
                                 target_name=target,
                                 estimate_dir=filename,
