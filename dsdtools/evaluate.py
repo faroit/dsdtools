@@ -7,10 +7,11 @@ from os import path as op
 import scipy
 import csv
 import dsdtools
+import difflib
 
 
 def load_track_list():
-    tracklist = [None]*101
+    tracklist = ['']*101
     csv_file = op.join(
         dsdtools.__path__[0], 'configs', 'tracklist.csv'
     )
@@ -19,7 +20,7 @@ def load_track_list():
         # skip header
         next(spamreader)
         for i, row in enumerate(spamreader):
-            tracklist[int(row[0])] = row[1]
+            tracklist[int(row[0])] = str(row[1])
     return tracklist
 
 
@@ -75,15 +76,20 @@ class Data(object):
                         # skip target
                         continue
                     else:
-                        for frame in range(frames):
-                            split_name = tdata['name'][0].split(' - ')
-                            try:
-                                track_id = int(split_name[0])
-                            except ValueError:
+                        split_name = tdata['name'][0].split(' - ')
+                        try:
+                            track_id = int(split_name[0])
+                        except ValueError:
+                            match = difflib.get_close_matches(
+                                str(tdata['name'][0]),
+                                self.tracklist,
+                                n=1
+                            )
+                            if match:
                                 track_id = int(
-                                    self.tracklist.index(tdata['name'][0])
+                                    self.tracklist.index(match[0])
                                 )
-
+                        for frame in range(frames):
                             series = self.row2series(
                                 track_id=track_id,
                                 track_name=tdata['name'][0],
