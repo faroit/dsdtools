@@ -31,13 +31,9 @@ if __name__ == "__main__":
             'tqdm',
             'pyaml',
             'PySoundFile>=0.8',
-            'mir_eval',
+            'mir_eval>=0.4',
             'pandas',
             'seaborn'
-        ],
-
-        dependency_links=[
-            'https://github.com/craffel/mir_eval/tarball/master#egg=mir_eval'
         ],
 
         package_data={
