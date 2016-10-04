@@ -29,6 +29,12 @@
         "2":"/home/erikjohnson/Documents/EvalSep/dsdtools/tests/data/",
         "3":"/home/erikjohnson/Documents/EvalSep/dsdtools/tests/data/"
     },
+    "estimate_name":{
+        "0":"JNS",
+        "1":"JNS",
+        "2":"JNS",
+        "3":"JNS"
+    },
     "sample":{
         "0":0.0,
         "1":661500.0,
